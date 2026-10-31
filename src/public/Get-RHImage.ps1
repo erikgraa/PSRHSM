@@ -55,7 +55,14 @@ function Get-RHImage {
 
             foreach ($item in $items) {
                 if ($item.filename -like $Filter) {
-                    $item
+                    [PSCustomObject]@{
+                        PSTypeName   = 'PSRedHat.Image'
+                        FileName     = $item.filename
+                        Checksum     = $item.checksum
+                        DownloadHref = $item.downloadHref
+                        Version      = $Version
+                        Architecture = $Architecture
+                    }
                 }
             }
 

@@ -11,6 +11,9 @@
     .PARAMETER FileName
     Specifies the file name to save as. Defaults to the name reported by the API.
 
+    .PARAMETER DownloadHref
+    Optional download link from Get-RHImage, used if the download endpoint returns no URL.
+
     .PARAMETER Path
     Specifies the destination directory. Defaults to the current directory.
 
@@ -38,6 +41,9 @@ function Save-RHImage {
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
         [String]$FileName,
 
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [String]$DownloadHref,
+
         [Parameter(Mandatory = $false)]
         [String]$Path = (Get-Location).Path,
 
@@ -62,15 +68,19 @@ function Save-RHImage {
             if (-not $apiFileName -and $candidate.filename) { $apiFileName = $candidate.filename }
         }
 
+        if (-not $href -and $DownloadHref) {
+            Write-Verbose -Message 'Falling back to the download link from Get-RHImage.'
+            $href = $DownloadHref
+        }
+
         if (-not $href) {
-            Write-Error -Message ('The API did not return a download URL for checksum {0}. Response: {1}' -f $Checksum, ($download | ConvertTo-Json -Depth 5 -Compress)) -ErrorAction Stop
+            Write-Error -Message ('The API did not return a download URL for checksum {0}. Response: {1}' -f $Checksum, ($download | ConvertTo-Json -Depth 5 -Compress))
+            return
         }
 
-        if (-not $FileName) {
-            $FileName = if ($apiFileName) { $apiFileName } else { [IO.Path]::GetFileName(([Uri]$href).AbsolutePath) }
-        }
+        $name = if ($FileName) { $FileName } elseif ($apiFileName) { $apiFileName } else { [IO.Path]::GetFileName(([Uri]$href).AbsolutePath) }
 
-        $destination = Join-Path -Path $Path -ChildPath $FileName
+        $destination = Join-Path -Path $Path -ChildPath $name
 
         if ((Test-Path -Path $destination) -and -not $Force) {
             Write-Error -Message ("'{0}' already exists. Use -Force to overwrite." -f $destination) -ErrorAction Stop
