@@ -38,6 +38,22 @@ Describe 'Get-RHSystem' {
     }
 }
 
+Describe 'Get-RHSubscription' {
+    It 'returns subscriptions and filters by name' {
+        InModuleScope PSRedHat {
+            Mock Invoke-RHApiRequest {
+                [PSCustomObject]@{ body = @(
+                    [PSCustomObject]@{ subscriptionName = 'Red Hat Developer Subscription' }
+                    [PSCustomObject]@{ subscriptionName = 'Other' }
+                ) }
+            }
+
+            @(Get-RHSubscription).Count | Should -Be 2
+            @(Get-RHSubscription -Name '*Developer*').Count | Should -Be 1
+        }
+    }
+}
+
 Describe 'Save-RHImage' {
     BeforeEach {
         InModuleScope PSRedHat {
