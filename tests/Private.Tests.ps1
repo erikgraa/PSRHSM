@@ -9,7 +9,7 @@ Describe 'Convert-SecureStringToPlaintext' {
     }
 }
 
-Describe 'Test-RHFileHash' {
+Describe 'Test-RHSMFileHash' {
     BeforeAll {
         $file = Join-Path $TestDrive 'a.bin'
         Set-Content -Path $file -Value 'hello' -NoNewline
@@ -17,41 +17,41 @@ Describe 'Test-RHFileHash' {
     }
 
     It 'returns true for a matching checksum' {
-        Test-RHFileHash -Path $file -Checksum $hash | Should -BeTrue
+        Test-RHSMFileHash -Path $file -Checksum $hash | Should -BeTrue
     }
 
     It 'is case-insensitive' {
-        Test-RHFileHash -Path $file -Checksum $hash.ToLower() | Should -BeTrue
+        Test-RHSMFileHash -Path $file -Checksum $hash.ToLower() | Should -BeTrue
     }
 
     It 'returns false for a mismatching checksum' {
-        Test-RHFileHash -Path $file -Checksum ('0' * 64) | Should -BeFalse
+        Test-RHSMFileHash -Path $file -Checksum ('0' * 64) | Should -BeFalse
     }
 }
 
-Describe 'Invoke-RHApiRequest' {
+Describe 'Invoke-RHSMApiRequest' {
     BeforeEach {
-        $script:RHSession = $null
+        $script:RHSMSession = $null
     }
 
     It 'throws when not connected' {
-        { Invoke-RHApiRequest -Path 'images' } | Should -Throw '*Not connected*'
+        { Invoke-RHSMApiRequest -Path 'images' } | Should -Throw '*Not connected*'
     }
 
     It 'refreshes an expired token and builds the query string' {
-        $script:RHSession = [PSCustomObject]@{
+        $script:RHSMSession = [PSCustomObject]@{
             BaseUri      = 'https://example.test/v1'
             OfflineToken = ConvertTo-SecureString 'off' -AsPlainText -Force
             AccessToken  = ConvertTo-SecureString 'old' -AsPlainText -Force
             ExpiresAt    = (Get-Date).AddMinutes(-1)
         }
 
-        Mock Get-RHAccessToken { [PSCustomObject]@{ AccessToken = (ConvertTo-SecureString 'new' -AsPlainText -Force); ExpiresAt = (Get-Date).AddHours(1) } }
+        Mock Get-RHSMAccessToken { [PSCustomObject]@{ AccessToken = (ConvertTo-SecureString 'new' -AsPlainText -Force); ExpiresAt = (Get-Date).AddHours(1) } }
         Mock Invoke-RestMethod { 'ok' }
 
-        Invoke-RHApiRequest -Path '/images' -Query @{ limit = 10 } | Should -Be 'ok'
+        Invoke-RHSMApiRequest -Path '/images' -Query @{ limit = 10 } | Should -Be 'ok'
 
-        Should -Invoke Get-RHAccessToken -Times 1
+        Should -Invoke Get-RHSMAccessToken -Times 1
         Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
             $Uri -eq 'https://example.test/v1/images?limit=10' -and $Headers.Authorization -eq 'Bearer new'
         }

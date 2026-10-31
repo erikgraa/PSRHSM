@@ -18,8 +18,8 @@
     The response shape (filename, checksum, downloadHref) follows the RHSM OpenAPI specification, which requires a Red Hat login to view; verify against your account.
 
     .EXAMPLE
-    Connect-RHSubscription -OfflineToken $token
-    Get-RHImage -Version 9.4 -Filter '*dvd*'
+    Connect-RHSM -OfflineToken $token
+    Get-RHSMImage -Version 9.4 -Filter '*dvd*'
 
     .OUTPUTS
     [PSCustomObject].
@@ -28,7 +28,7 @@
     https://access.redhat.com/management/api/rhsm#/images
 #>
 
-function Get-RHImage {
+function Get-RHSMImage {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (
@@ -52,13 +52,13 @@ function Get-RHImage {
                 $offset = 0
 
                 do {
-                    $response = Invoke-RHApiRequest -Path $path -Query @{ limit = $limit; offset = $offset }
+                    $response = Invoke-RHSMApiRequest -Path $path -Query @{ limit = $limit; offset = $offset }
                     $items = @($response.body)
 
                     foreach ($item in $items) {
                         if ($item.filename -like $Filter) {
                             [PSCustomObject]@{
-                                PSTypeName   = 'PSRedHat.Image'
+                                PSTypeName   = 'PSRHSM.Image'
                                 FileName     = $item.filename
                                 Checksum     = $item.checksum
                                 DownloadHref = $item.downloadHref

@@ -14,7 +14,7 @@
 
     .EXAMPLE
     $token = Read-Host -AsSecureString -Prompt 'Red Hat offline token'
-    Connect-RHSubscription -OfflineToken $token
+    Connect-RHSM -OfflineToken $token
 
     .OUTPUTS
     [PSCustomObject].
@@ -23,7 +23,7 @@
     https://access.redhat.com/management/api/rhsm
 #>
 
-function Connect-RHSubscription {
+function Connect-RHSM {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (
@@ -36,9 +36,9 @@ function Connect-RHSubscription {
     )
 
     process {
-        $token = Get-RHAccessToken -OfflineToken $OfflineToken
+        $token = Get-RHSMAccessToken -OfflineToken $OfflineToken
 
-        $script:RHSession = [PSCustomObject]@{
+        $script:RHSMSession = [PSCustomObject]@{
             BaseUri      = $BaseUri
             OfflineToken = $OfflineToken
             AccessToken  = $token.AccessToken

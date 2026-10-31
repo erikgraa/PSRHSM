@@ -1,6 +1,6 @@
-<p align="center"><img src="assets/icon.png" alt="PSRedHat icon" width="160"></p>
+<p align="center"><img src="assets/icon.png" alt="PSRHSM icon" width="160"></p>
 
-# 🎩 PSRedHat
+# 🐧 PSRHSM
 
 PowerShell module for the **Red Hat Subscription Management (RHSM) API**: authenticate, find and download RHEL images, and inspect your systems, subscriptions and organization.
 
@@ -25,10 +25,10 @@ PowerShell module for the **Red Hat Subscription Management (RHSM) API**: authen
 ## 🚀 Getting started
 
 ```powershell
-Import-Module .\src\PSRedHat.psd1
+Import-Module .\src\PSRHSM.psd1
 
 $token = Read-Host -AsSecureString -Prompt 'Red Hat offline token'
-Connect-RHSubscription -OfflineToken $token
+Connect-RHSM -OfflineToken $token
 ```
 
 The token is exchanged at `sso.redhat.com` (`grant_type=refresh_token`, `client_id=rhsm-api`) for a short-lived access token that is kept in module scope and refreshed automatically.
@@ -37,13 +37,13 @@ The token is exchanged at `sso.redhat.com` (`grant_type=refresh_token`, `client_
 
 | Cmdlet | Endpoint | Description |
 |---|---|---|
-| `Connect-RHSubscription` | SSO token | 🔐 Sign in with an offline token |
-| `Disconnect-RHSubscription` | n/a | 👋 Clear the stored session |
-| `Get-RHImage` | `GET /images/rhel/{version}/{arch}` | 💿 List RHEL images |
-| `Save-RHImage` | image `downloadHref` | ⬇️ Download images and verify SHA-256 |
-| `Get-RHSystem` | `GET /systems` | 🖥️ List registered systems |
-| `Get-RHSubscription` | `GET /subscriptions` | 🧾 List subscriptions |
-| `Get-RHOrganization` | `GET /organization` | 🏢 Get the organization |
+| `Connect-RHSM` | SSO token | 🔐 Sign in with an offline token |
+| `Disconnect-RHSM` | n/a | 👋 Clear the stored session |
+| `Get-RHSMImage` | `GET /images/rhel/{version}/{arch}` | 💿 List RHEL images |
+| `Save-RHSMImage` | image `downloadHref` | ⬇️ Download images and verify SHA-256 |
+| `Get-RHSMSystem` | `GET /systems` | 🖥️ List registered systems |
+| `Get-RHSMSubscription` | `GET /subscriptions` | 🧾 List subscriptions |
+| `Get-RHSMOrganization` | `GET /organization` | 🏢 Get the organization |
 
 Use `Get-Help <cmdlet> -Full` for details.
 
@@ -51,29 +51,29 @@ Use `Get-Help <cmdlet> -Full` for details.
 
 ```powershell
 # List images (several versions/architectures at once)
-Get-RHImage -Version 9.4, 9.5 -Architecture x86_64, aarch64 -Filter '*dvd*'
+Get-RHSMImage -Version 9.4, 9.5 -Architecture x86_64, aarch64 -Filter '*dvd*'
 
 # Download everything matching the filter
-Get-RHImage -Version 9.4 -Filter '*dvd*' | Save-RHImage -Path C:\ISO
+Get-RHSMImage -Version 9.4 -Filter '*dvd*' | Save-RHSMImage -Path C:\ISO
 
 # Or pass images explicitly
-$images = Get-RHImage -Version 9.4 -Filter '*boot*'
-Save-RHImage -InputObject $images -Path C:\ISO
+$images = Get-RHSMImage -Version 9.4 -Filter '*boot*'
+Save-RHSMImage -InputObject $images -Path C:\ISO
 
 # Or specify the link directly
-Save-RHImage -DownloadHref <href> -FileName rhel-9.4-x86_64-dvd.iso -Checksum <sha256> -Path C:\ISO
+Save-RHSMImage -DownloadHref <href> -FileName rhel-9.4-x86_64-dvd.iso -Checksum <sha256> -Path C:\ISO
 ```
 
 Image variants are told apart by file name: `dvd` (full installer), `boot` (network installer), `qcow2` (KVM guest image) and so on. `-Filter` is a wildcard on the file name.
 
-`Save-RHImage` supports `-Force` (overwrite) and `-WhatIf` (preview). The SHA-256 is checked after download, and a mismatching file is deleted.
+`Save-RHSMImage` supports `-Force` (overwrite) and `-WhatIf` (preview). The SHA-256 is checked after download, and a mismatching file is deleted.
 
 ## 🖥️ Systems, 🧾 subscriptions and 🏢 organization
 
 ```powershell
-Get-RHSystem -Name 'web*'
-Get-RHSubscription -Name '*Developer*'
-Get-RHOrganization
+Get-RHSMSystem -Name 'web*'
+Get-RHSMSubscription -Name '*Developer*'
+Get-RHSMOrganization
 ```
 
 ## 🧪 Tests

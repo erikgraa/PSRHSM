@@ -1,79 +1,79 @@
 BeforeAll {
-    Import-Module (Join-Path $PSScriptRoot '..\src\PSRedHat.psd1') -Force
+    Import-Module (Join-Path $PSScriptRoot '..\src\PSRHSM.psd1') -Force
 }
 
-Describe 'Get-RHImage' {
+Describe 'Get-RHSMImage' {
     It 'queries every version and architecture and filters by file name' {
-        InModuleScope PSRedHat {
-            Mock Invoke-RHApiRequest {
+        InModuleScope PSRHSM {
+            Mock Invoke-RHSMApiRequest {
                 [PSCustomObject]@{ body = @(
                     [PSCustomObject]@{ filename = 'x-dvd.iso'; checksum = 'AA'; downloadHref = 'https://h/a' }
                     [PSCustomObject]@{ filename = 'x-boot.iso'; checksum = 'BB'; downloadHref = 'https://h/b' }
                 ) }
             }
 
-            $result = @(Get-RHImage -Version 9.4, 9.5 -Architecture x86_64, aarch64 -Filter '*dvd*')
+            $result = @(Get-RHSMImage -Version 9.4, 9.5 -Architecture x86_64, aarch64 -Filter '*dvd*')
 
             $result.Count | Should -Be 4
-            $result[0].PSObject.TypeNames | Should -Contain 'PSRedHat.Image'
-            Should -Invoke Invoke-RHApiRequest -Times 4 -Exactly
+            $result[0].PSObject.TypeNames | Should -Contain 'PSRHSM.Image'
+            Should -Invoke Invoke-RHSMApiRequest -Times 4 -Exactly
         }
     }
 }
 
-Describe 'Get-RHSystem' {
+Describe 'Get-RHSMSystem' {
     It 'pages through systems and filters by name' {
-        InModuleScope PSRedHat {
+        InModuleScope PSRHSM {
             $script:calls = 0
-            Mock Invoke-RHApiRequest {
+            Mock Invoke-RHSMApiRequest {
                 $script:calls++
                 $count = if ($script:calls -eq 1) { 100 } else { 1 }
                 [PSCustomObject]@{ body = 1..$count | ForEach-Object { [PSCustomObject]@{ name = ('web{0}-{1}' -f $script:calls, $_) } } }
             }
 
-            @(Get-RHSystem).Count | Should -Be 101
+            @(Get-RHSMSystem).Count | Should -Be 101
             $script:calls | Should -Be 2
-            @(Get-RHSystem -Name 'web2-*').Count | Should -Be 0
+            @(Get-RHSMSystem -Name 'web2-*').Count | Should -Be 0
         }
     }
 }
 
-Describe 'Get-RHSubscription' {
+Describe 'Get-RHSMSubscription' {
     It 'returns subscriptions and filters by name' {
-        InModuleScope PSRedHat {
-            Mock Invoke-RHApiRequest {
+        InModuleScope PSRHSM {
+            Mock Invoke-RHSMApiRequest {
                 [PSCustomObject]@{ body = @(
                     [PSCustomObject]@{ subscriptionName = 'Red Hat Developer Subscription' }
                     [PSCustomObject]@{ subscriptionName = 'Other' }
                 ) }
             }
 
-            @(Get-RHSubscription).Count | Should -Be 2
-            @(Get-RHSubscription -Name '*Developer*').Count | Should -Be 1
+            @(Get-RHSMSubscription).Count | Should -Be 2
+            @(Get-RHSMSubscription -Name '*Developer*').Count | Should -Be 1
         }
     }
 }
 
-Describe 'Get-RHOrganization' {
+Describe 'Get-RHSMOrganization' {
     It 'unwraps the body when present' {
-        InModuleScope PSRedHat {
-            Mock Invoke-RHApiRequest { [PSCustomObject]@{ body = [PSCustomObject]@{ name = 'Acme' } } }
-            (Get-RHOrganization).name | Should -Be 'Acme'
+        InModuleScope PSRHSM {
+            Mock Invoke-RHSMApiRequest { [PSCustomObject]@{ body = [PSCustomObject]@{ name = 'Acme' } } }
+            (Get-RHSMOrganization).name | Should -Be 'Acme'
         }
     }
 
     It 'returns the response itself when there is no body' {
-        InModuleScope PSRedHat {
-            Mock Invoke-RHApiRequest { [PSCustomObject]@{ name = 'Acme' } }
-            (Get-RHOrganization).name | Should -Be 'Acme'
+        InModuleScope PSRHSM {
+            Mock Invoke-RHSMApiRequest { [PSCustomObject]@{ name = 'Acme' } }
+            (Get-RHSMOrganization).name | Should -Be 'Acme'
         }
     }
 }
 
-Describe 'Save-RHImage' {
+Describe 'Save-RHSMImage' {
     BeforeEach {
-        InModuleScope PSRedHat {
-            Mock Get-RHAuthorizationHeader { @{ Authorization = 'Bearer t' } }
+        InModuleScope PSRHSM {
+            Mock Get-RHSMAuthorizationHeader { @{ Authorization = 'Bearer t' } }
             Mock Invoke-WebRequest { Set-Content -Path $OutFile -Value 'hello' -NoNewline }
         }
 
@@ -85,14 +85,14 @@ Describe 'Save-RHImage' {
             [PSCustomObject]@{ DownloadHref = "https://h/$_"; FileName = "f$_.iso"; Checksum = $hash }
         }
 
-        @($images | Save-RHImage -Path $TestDrive).Count | Should -Be 2
-        @(Save-RHImage -InputObject $images -Path $TestDrive -Force).Count | Should -Be 2
+        @($images | Save-RHSMImage -Path $TestDrive).Count | Should -Be 2
+        @(Save-RHSMImage -InputObject $images -Path $TestDrive -Force).Count | Should -Be 2
     }
 
     It 'removes the file and errors on checksum mismatch' {
         $image = [PSCustomObject]@{ DownloadHref = 'https://h/x'; FileName = 'bad.iso'; Checksum = ('0' * 64) }
 
-        { Save-RHImage -InputObject $image -Path $TestDrive -ErrorAction Stop } | Should -Throw '*checksum mismatch*'
+        { Save-RHSMImage -InputObject $image -Path $TestDrive -ErrorAction Stop } | Should -Throw '*checksum mismatch*'
         Test-Path (Join-Path $TestDrive 'bad.iso') | Should -BeFalse
     }
 }

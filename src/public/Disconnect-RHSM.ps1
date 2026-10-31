@@ -6,14 +6,14 @@
     Removes the offline token and access token held in module scope.
 
     .EXAMPLE
-    Disconnect-RHSubscription
+    Disconnect-RHSM
 #>
 
-function Disconnect-RHSubscription {
+function Disconnect-RHSM {
     [CmdletBinding()]
     param ()
 
     process {
-        $script:RHSession = $null
+        $script:RHSMSession = $null
     }
 }

@@ -1,4 +1,4 @@
-function Test-RHFileHash {
+function Test-RHSMFileHash {
     [CmdletBinding()]
     [OutputType([Boolean])]
     param (

@@ -12,6 +12,6 @@ foreach ($_cmdlet in @($public + $private)) {
     }
 }
 
-$script:RHSession = $null
+$script:RHSMSession = $null
 
 Export-ModuleMember -Function $public.BaseName

@@ -12,8 +12,8 @@
     The response shape follows the RHSM OpenAPI specification, which requires a Red Hat login to view; verify against your account.
 
     .EXAMPLE
-    Connect-RHSubscription -OfflineToken $token
-    Get-RHSystem -Name 'web*'
+    Connect-RHSM -OfflineToken $token
+    Get-RHSMSystem -Name 'web*'
 
     .OUTPUTS
     [PSCustomObject].
@@ -22,7 +22,7 @@
     https://access.redhat.com/management/api/rhsm#/systems
 #>
 
-function Get-RHSystem {
+function Get-RHSMSystem {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (
@@ -35,12 +35,12 @@ function Get-RHSystem {
         $offset = 0
 
         do {
-            $response = Invoke-RHApiRequest -Path 'systems' -Query @{ limit = $limit; offset = $offset }
+            $response = Invoke-RHSMApiRequest -Path 'systems' -Query @{ limit = $limit; offset = $offset }
             $items = @($response.body)
 
             foreach ($item in $items) {
                 if ($item.name -like $Name) {
-                    $item.PSObject.TypeNames.Insert(0, 'PSRedHat.System')
+                    $item.PSObject.TypeNames.Insert(0, 'PSRHSM.System')
                     $item
                 }
             }

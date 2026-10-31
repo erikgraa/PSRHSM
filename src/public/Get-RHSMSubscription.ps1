@@ -12,8 +12,8 @@
     The response shape (body array, subscriptionName) follows the RHSM OpenAPI specification, which requires a Red Hat login to view; verify against your account.
 
     .EXAMPLE
-    Connect-RHSubscription -OfflineToken $token
-    Get-RHSubscription -Name '*Developer*'
+    Connect-RHSM -OfflineToken $token
+    Get-RHSMSubscription -Name '*Developer*'
 
     .OUTPUTS
     [PSCustomObject].
@@ -22,7 +22,7 @@
     https://access.redhat.com/management/api/rhsm#/subscriptions
 #>
 
-function Get-RHSubscription {
+function Get-RHSMSubscription {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (
@@ -35,12 +35,12 @@ function Get-RHSubscription {
         $offset = 0
 
         do {
-            $response = Invoke-RHApiRequest -Path 'subscriptions' -Query @{ limit = $limit; offset = $offset }
+            $response = Invoke-RHSMApiRequest -Path 'subscriptions' -Query @{ limit = $limit; offset = $offset }
             $items = @($response.body)
 
             foreach ($item in $items) {
                 if ($Name -eq '*' -or $item.subscriptionName -like $Name) {
-                    $item.PSObject.TypeNames.Insert(0, 'PSRedHat.Subscription')
+                    $item.PSObject.TypeNames.Insert(0, 'PSRHSM.Subscription')
                     $item
                 }
             }

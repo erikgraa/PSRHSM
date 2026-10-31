@@ -1,4 +1,4 @@
-function Invoke-RHApiRequest {
+function Invoke-RHSMApiRequest {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
@@ -8,10 +8,10 @@ function Invoke-RHApiRequest {
         [Hashtable]$Query
     )
 
-    $headers = Get-RHAuthorizationHeader
+    $headers = Get-RHSMAuthorizationHeader
     $headers['Accept'] = 'application/json'
 
-    $uri = '{0}/{1}' -f $script:RHSession.BaseUri.TrimEnd('/'), $Path.TrimStart('/')
+    $uri = '{0}/{1}' -f $script:RHSMSession.BaseUri.TrimEnd('/'), $Path.TrimStart('/')
 
     if ($Query -and $Query.Count -gt 0) {
         $pairs = foreach ($key in $Query.Keys) {

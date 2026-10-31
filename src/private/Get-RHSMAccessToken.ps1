@@ -1,4 +1,4 @@
-function Get-RHAccessToken {
+function Get-RHSMAccessToken {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (

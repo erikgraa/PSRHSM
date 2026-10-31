@@ -9,8 +9,8 @@
     The response shape follows the RHSM OpenAPI specification, which requires a Red Hat login to view; if the response has a 'body' property it is returned, otherwise the response itself.
 
     .EXAMPLE
-    Connect-RHSubscription -OfflineToken $token
-    Get-RHOrganization
+    Connect-RHSM -OfflineToken $token
+    Get-RHSMOrganization
 
     .OUTPUTS
     [PSCustomObject].
@@ -19,17 +19,17 @@
     https://access.redhat.com/management/api/rhsm#/organization
 #>
 
-function Get-RHOrganization {
+function Get-RHSMOrganization {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param ()
 
     process {
-        $response = Invoke-RHApiRequest -Path 'organization'
+        $response = Invoke-RHSMApiRequest -Path 'organization'
         $organization = if ($null -ne $response.body) { $response.body } else { $response }
 
         foreach ($item in @($organization)) {
-            $item.PSObject.TypeNames.Insert(0, 'PSRedHat.Organization')
+            $item.PSObject.TypeNames.Insert(0, 'PSRHSM.Organization')
             $item
         }
     }
