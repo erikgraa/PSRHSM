@@ -29,10 +29,10 @@
                 'RedHat', 'RHEL', 'RHSM', 'PowerShell', 'PowerShell-Core', 'PowerShell-Desktop'
             )
 
-            ProjectUri     = 'https://github.com/erikgraa/PSRedHat'
-            IconUri        = 'https://raw.githubusercontent.com/erikgraa/PSRedHat/main/assets/icon.png'
-            License        = 'https://github.com/erikgraa/PSRedHat/blob/main/LICENSE'
-            ReleaseNotes   = 'https://github.com/erikgraa/PSRedHat'
+            ProjectUri     = 'https://github.com/erikgraa/PSRHSM'
+            IconUri        = 'https://raw.githubusercontent.com/erikgraa/PSRHSM/main/assets/icon.png'
+            License        = 'https://github.com/erikgraa/PSRHSM/blob/main/LICENSE'
+            ReleaseNotes   = 'https://github.com/erikgraa/PSRHSM'
         }
     }
 }
