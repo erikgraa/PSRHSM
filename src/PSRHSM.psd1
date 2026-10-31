@@ -21,7 +21,7 @@
 
     PowerShellVersion = '5.1'
 
-    FunctionsToExport = @('Connect-RHSM', 'Disconnect-RHSM', 'Get-RHSMImage', 'Get-RHSMOrganization', 'Get-RHSMSystem', 'Get-RHSMSubscription', 'Save-RHSMImage')
+    FunctionsToExport = @('Connect-RHSM', 'Disconnect-RHSM', 'Get-RHSMActivationKey', 'Get-RHSMImage', 'Get-RHSMOrganization', 'Get-RHSMSystem', 'Get-RHSMSubscription', 'New-RHSMActivationKey', 'Save-RHSMImage')
 
     PrivateData = @{
         PSData = @{
