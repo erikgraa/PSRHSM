@@ -47,14 +47,27 @@ function Save-RHImage {
 
     process {
         $download = Invoke-RHApiRequest -Path ('images/{0}/download' -f [Uri]::EscapeDataString($Checksum))
-        $href = $download.body.href
+        Write-Verbose -Message ('Download response: {0}' -f ($download | ConvertTo-Json -Depth 5 -Compress))
+
+        $href = $null
+        $apiFileName = $null
+
+        foreach ($candidate in @($download.body, $download)) {
+            if (-not $candidate) { continue }
+
+            foreach ($property in 'href', 'url', 'downloadHref', 'downloadUrl') {
+                if (-not $href -and $candidate.$property -is [String]) { $href = $candidate.$property }
+            }
+
+            if (-not $apiFileName -and $candidate.filename) { $apiFileName = $candidate.filename }
+        }
 
         if (-not $href) {
-            Write-Error -Message 'The API did not return a download URL.' -ErrorAction Stop
+            Write-Error -Message ('The API did not return a download URL for checksum {0}. Response: {1}' -f $Checksum, ($download | ConvertTo-Json -Depth 5 -Compress)) -ErrorAction Stop
         }
 
         if (-not $FileName) {
-            $FileName = if ($download.body.filename) { $download.body.filename } else { [IO.Path]::GetFileName(([Uri]$href).AbsolutePath) }
+            $FileName = if ($apiFileName) { $apiFileName } else { [IO.Path]::GetFileName(([Uri]$href).AbsolutePath) }
         }
 
         $destination = Join-Path -Path $Path -ChildPath $FileName
