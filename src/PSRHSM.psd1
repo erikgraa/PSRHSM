@@ -7,7 +7,7 @@
 @{
     RootModule = 'PSRHSM.psm1'
 
-    ModuleVersion = '0.2610.2'
+    ModuleVersion = '0.2611.1'
 
     CompatiblePSEditions = @('Core', 'Desktop')
 

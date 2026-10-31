@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. Versions follow `0.YYMM.N`.
 
-## [Unreleased]
+## [0.2611.1] - 2026-11-01
 
 ### Added
 - `Get-RHSMActivationKey` and `New-RHSMActivationKey` for the v2 activation keys API (`https://console.redhat.com/api/rhsm/v2`).
