@@ -1,0 +1,5 @@
+*.iso
+*.qcow2
+*.raw
+*.vhd
+src/test/
