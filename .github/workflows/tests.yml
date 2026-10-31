@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pester:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: 'ubuntu / PowerShell 7', os: ubuntu-latest, shell: pwsh }
+          - { name: 'windows / PowerShell 7', os: windows-latest, shell: pwsh }
+          - { name: 'windows / Windows PowerShell 5.1', os: windows-latest, shell: powershell }
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show version
+        run: $PSVersionTable.PSVersion
+      - name: Pester
+        run: |
+          Install-Module Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
+          $r = Invoke-Pester ./tests -Output Detailed -PassThru
+          if ($r.FailedCount) { exit 1 }
+      - name: Manifest
+        run: Test-ModuleManifest ./src/PSRHSM.psd1
+      - name: PSScriptAnalyzer (errors only)
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          $e = Invoke-ScriptAnalyzer -Path ./src -Recurse -Severity Error
+          $e | Format-Table
+          if ($e) { exit 1 }

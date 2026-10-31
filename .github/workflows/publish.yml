@@ -1,0 +1,59 @@
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build and verify only, do not push to the Gallery'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check version
+        shell: pwsh
+        run: |
+          $v = (Import-PowerShellDataFile ./src/PSRHSM.psd1).ModuleVersion
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$v") {
+            throw "Tag $env:GITHUB_REF_NAME does not match manifest version $v."
+          }
+          "VERSION=$v" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Pester
+        shell: pwsh
+        run: |
+          Install-Module Pester -MinimumVersion 5.5 -Force -Scope CurrentUser
+          $r = Invoke-Pester ./tests -Output Minimal -PassThru
+          if ($r.FailedCount) { exit 1 }
+      - name: Stage module
+        shell: pwsh
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'PSRHSM'
+          New-Item $stage -ItemType Directory | Out-Null
+          Copy-Item ./src/* $stage -Recurse
+          Copy-Item ./LICENSE, ./README.md $stage
+          Test-ModuleManifest (Join-Path $stage 'PSRHSM.psd1') | Out-Null
+      - name: Publish to PowerShell Gallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          $path = Join-Path $env:RUNNER_TEMP 'PSRHSM'
+          if ($env:GITHUB_EVENT_NAME -eq 'push' -or '${{ inputs.dry_run }}' -eq 'false') {
+            Publish-Module -Path $path -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
+          }
+          else {
+            Publish-Module -Path $path -NuGetApiKey 'dry-run' -WhatIf
+          }
+      - name: GitHub release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --generate-notes
