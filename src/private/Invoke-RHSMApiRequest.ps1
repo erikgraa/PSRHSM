@@ -15,16 +15,16 @@ function Invoke-RHSMApiRequest {
         [Hashtable]$Body,
 
         [Parameter(Mandatory = $false)]
-        [ValidatePattern('^v\d+$')]
+        [ValidateSet('v1', 'v2')]
         [String]$ApiVersion = 'v1'
     )
 
     $headers = Get-RHSMAuthorizationHeader
     $headers['Accept'] = 'application/json'
 
-    # The session base URI ends in the default API version; swap it when another version is requested
-    $baseUri = $script:RHSMSession.BaseUri.TrimEnd('/') -replace '/v\d+$', ('/{0}' -f $ApiVersion)
-    $uri = '{0}/{1}' -f $baseUri, $Path.TrimStart('/')
+    # v1 lives under /management/v1, v2 under /api/rhsm/v2
+    $baseUri = if ($ApiVersion -eq 'v2') { $script:RHSMSession.BaseUriV2 } else { $script:RHSMSession.BaseUri }
+    $uri = '{0}/{1}' -f $baseUri.TrimEnd('/'), $Path.TrimStart('/')
 
     if ($Query -and $Query.Count -gt 0) {
         $pairs = foreach ($key in $Query.Keys) {

@@ -10,7 +10,10 @@
     Specifies the Red Hat offline token as a SecureString. Generate one at https://access.redhat.com/management/api.
 
     .PARAMETER BaseUri
-    Specifies the API base URI. Defaults to https://api.access.redhat.com/management/v1.
+    Specifies the v1 API base URI. Defaults to https://api.access.redhat.com/management/v1.
+
+    .PARAMETER BaseUriV2
+    Specifies the v2 API base URI, used for activation keys. Defaults to https://api.access.redhat.com/api/rhsm/v2.
 
     .EXAMPLE
     $token = Read-Host -AsSecureString -Prompt 'Red Hat offline token'
@@ -32,7 +35,11 @@ function Connect-RHSM {
 
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
-        [String]$BaseUri = 'https://api.access.redhat.com/management/v1'
+        [String]$BaseUri = 'https://api.access.redhat.com/management/v1',
+
+        [Parameter(Mandatory = $false)]
+        [ValidateNotNullOrEmpty()]
+        [String]$BaseUriV2 = 'https://api.access.redhat.com/api/rhsm/v2'
     )
 
     process {
@@ -40,6 +47,7 @@ function Connect-RHSM {
 
         $script:RHSMSession = [PSCustomObject]@{
             BaseUri      = $BaseUri
+            BaseUriV2    = $BaseUriV2
             OfflineToken = $OfflineToken
             AccessToken  = $token.AccessToken
             ExpiresAt    = $token.ExpiresAt

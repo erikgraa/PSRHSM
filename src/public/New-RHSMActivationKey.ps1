@@ -3,7 +3,7 @@
     Creates an activation key.
 
     .DESCRIPTION
-    Creates an activation key with POST /management/v2/activation_keys on the RHSM API. Only the parameters you specify are sent.
+    Creates an activation key with POST /api/rhsm/v2/activation_keys on the RHSM API. Only the parameters you specify are sent.
 
     .PARAMETER Name
     Specifies the activation key name.

@@ -3,7 +3,7 @@
     Lists activation keys.
 
     .DESCRIPTION
-    Queries GET /management/v2/activation_keys on the RHSM API.
+    Queries GET /api/rhsm/v2/activation_keys on the RHSM API.
 
     .PARAMETER Name
     Optional wildcard filter applied to the activation key name, e.g. 'prod-*'.

@@ -11,6 +11,7 @@ Describe 'Invoke-RHSMApiRequest (POST and API version)' {
         InModuleScope PSRHSM {
             $script:RHSMSession = [PSCustomObject]@{
                 BaseUri      = 'https://example.test/management/v1'
+                BaseUriV2    = 'https://example.test/api/rhsm/v2'
                 OfflineToken = ConvertTo-SecureString 'offline' -AsPlainText -Force
                 AccessToken  = ConvertTo-SecureString 'access' -AsPlainText -Force
                 ExpiresAt    = (Get-Date).AddHours(1)
@@ -19,12 +20,16 @@ Describe 'Invoke-RHSMApiRequest (POST and API version)' {
         }
     }
 
-    It 'swaps the API version in the base URI' {
+    It 'uses the v2 base URI for v2 requests and the v1 base URI otherwise' {
         InModuleScope PSRHSM {
             Invoke-RHSMApiRequest -Path 'activation_keys' -ApiVersion v2 | Out-Null
+            Invoke-RHSMApiRequest -Path 'systems' | Out-Null
 
             Should -Invoke Invoke-RestMethod -Times 1 -Exactly -ParameterFilter {
-                $Uri -eq 'https://example.test/management/v2/activation_keys' -and $Method -eq 'Get'
+                $Uri -eq 'https://example.test/api/rhsm/v2/activation_keys' -and $Method -eq 'Get'
+            }
+            Should -Invoke Invoke-RestMethod -Times 1 -Exactly -ParameterFilter {
+                $Uri -eq 'https://example.test/management/v1/systems'
             }
         }
     }

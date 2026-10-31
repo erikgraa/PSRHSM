@@ -90,6 +90,12 @@ Describe 'Connect-RHSM / Disconnect-RHSM' {
         (Connect-RHSM -OfflineToken (ConvertTo-SecureString 'offline' -AsPlainText -Force) -BaseUri 'https://example.test/v1').BaseUri | Should -Be 'https://example.test/v1'
     }
 
+    It 'stores the default v2 base URI used for activation keys' {
+        Connect-RHSM -OfflineToken (ConvertTo-SecureString 'offline' -AsPlainText -Force) | Out-Null
+
+        InModuleScope PSRHSM { $script:RHSMSession.BaseUriV2 | Should -Be 'https://api.access.redhat.com/api/rhsm/v2' }
+    }
+
     It 'clears the session on disconnect' {
         Connect-RHSM -OfflineToken (ConvertTo-SecureString 'offline' -AsPlainText -Force) | Out-Null
         Disconnect-RHSM
