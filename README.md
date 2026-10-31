@@ -15,6 +15,7 @@ PowerShell module for the **Red Hat Subscription Management (RHSM) API**: authen
 - 🖥️ List registered systems
 - 🧾 List subscriptions
 - 🏢 Get organization details
+- 🔑 List and create activation keys
 - 📦 Works on Windows PowerShell 5.1 and PowerShell 7+
 
 ## 📋 Requirements
@@ -44,6 +45,8 @@ The token is exchanged at `sso.redhat.com` (`grant_type=refresh_token`, `client_
 | `Get-RHSMSystem` | `GET /systems` | 🖥️ List registered systems |
 | `Get-RHSMSubscription` | `GET /subscriptions` | 🧾 List subscriptions |
 | `Get-RHSMOrganization` | `GET /organization` | 🏢 Get the organization |
+| `Get-RHSMActivationKey` | `GET /v2/activation_keys` | 🔑 List activation keys |
+| `New-RHSMActivationKey` | `POST /v2/activation_keys` | ➕ Create an activation key |
 
 Use `Get-Help <cmdlet> -Full` for details.
 
@@ -75,6 +78,20 @@ Get-RHSMSystem -Name 'web*'
 Get-RHSMSubscription -Name '*Developer*'
 Get-RHSMOrganization
 ```
+
+## 🔑 Activation keys
+
+```powershell
+Get-RHSMActivationKey -Name 'prod-*'
+
+New-RHSMActivationKey -Name 'prod-rhel9' -Description 'Production RHEL 9' `
+    -ReleaseVersion 9.4 -Role 'Red Hat Enterprise Linux Server' -ServiceLevel Premium -Usage Production
+
+# Preview without creating
+New-RHSMActivationKey -Name 'prod-rhel9' -WhatIf
+```
+
+Only the parameters you specify are sent. The accepted values for `-Role`, `-ServiceLevel` and `-Usage` are defined by Red Hat and are not validated by the module.
 
 ## 🧪 Tests
 
