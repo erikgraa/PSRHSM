@@ -88,7 +88,7 @@ CI runs the Pester tests, manifest check and PSScriptAnalyzer on Ubuntu, Windows
 
 To publish to the PowerShell Gallery:
 
-1. Bump `ModuleVersion` in `src/PSRHSM.psd1` and merge.
+1. Bump `ModuleVersion` in `src/PSRHSM.psd1`, add an entry to [CHANGELOG.md](CHANGELOG.md) and merge.
 2. Tag the commit `v<ModuleVersion>` (e.g. `v0.2610.1`) and push the tag.
 
 The **Publish** workflow verifies that the tag matches the manifest, runs the tests, publishes with `Publish-Module` and creates a GitHub release. It needs the repository secret `PSGALLERY_API_KEY`. Run the workflow manually with `dry_run` enabled to check packaging without publishing.
