@@ -1,59 +1,89 @@
-# PSRedHat
+# 🎩 PSRedHat
 
-PowerShell module for the Red Hat Subscription Management (RHSM) API. Current scope: authentication and RHEL image download. Subscriptions, systems and activation keys may follow.
+PowerShell module for the **Red Hat Subscription Management (RHSM) API**: authenticate, find and download RHEL images, and inspect your systems, subscriptions and organization.
 
-## Install
+> ⚠️ Unofficial, community module. Not affiliated with or endorsed by Red Hat, Inc. "Red Hat" and "RHEL" are trademarks of Red Hat, Inc.
+
+> 🧪 The RHSM OpenAPI docs require a Red Hat login, so response shapes were written from the documented API. Please report discrepancies.
+
+## ✨ Features
+
+- 🔐 Offline token → bearer token, refreshed automatically
+- 💿 List and download RHEL images, with SHA-256 verification
+- 🖥️ List registered systems
+- 🧾 List subscriptions
+- 🏢 Get organization details
+- 📦 Works on Windows PowerShell 5.1 and PowerShell 7+
+
+## 📋 Requirements
+
+- A Red Hat account (the free Developer subscription works for RHEL downloads)
+- An **offline token**, generated at <https://access.redhat.com/management/api>. Treat it like a password; it expires after 30 days of inactivity.
+
+## 🚀 Getting started
 
 ```powershell
 Import-Module .\src\PSRedHat.psd1
-```
 
-## Usage
-
-Generate an offline token at <https://access.redhat.com/management/api>, then:
-
-```powershell
 $token = Read-Host -AsSecureString -Prompt 'Red Hat offline token'
 Connect-RHSubscription -OfflineToken $token
-
-# List images
-Get-RHImage -Version 9.4 -Architecture x86_64 -Filter '*dvd*'
-
-# Download (with progress and SHA-256 verification)
-Get-RHImage -Version 9.4 -Filter '*dvd*' | Save-RHImage -Path C:\ISO
-
-Disconnect-RHSubscription
 ```
 
-### Downloading after `Get-RHImage`
+The token is exchanged at `sso.redhat.com` (`grant_type=refresh_token`, `client_id=rhsm-api`) for a short-lived access token that is kept in module scope and refreshed automatically.
 
-`Save-RHImage` accepts `DownloadHref`, `FileName` and `Checksum` from the pipeline:
+## 🧰 Cmdlets
+
+| Cmdlet | Endpoint | Description |
+|---|---|---|
+| `Connect-RHSubscription` | SSO token | 🔐 Sign in with an offline token |
+| `Disconnect-RHSubscription` | n/a | 👋 Clear the stored session |
+| `Get-RHImage` | `GET /images/rhel/{version}/{arch}` | 💿 List RHEL images |
+| `Save-RHImage` | image `downloadHref` | ⬇️ Download images and verify SHA-256 |
+| `Get-RHSystem` | `GET /systems` | 🖥️ List registered systems |
+| `Get-RHSubscription` | `GET /subscriptions` | 🧾 List subscriptions |
+| `Get-RHOrganization` | `GET /organization` | 🏢 Get the organization |
+
+Use `Get-Help <cmdlet> -Full` for details.
+
+## 💿 Images
 
 ```powershell
+# List images (several versions/architectures at once)
+Get-RHImage -Version 9.4, 9.5 -Architecture x86_64, aarch64 -Filter '*dvd*'
+
 # Download everything matching the filter
 Get-RHImage -Version 9.4 -Filter '*dvd*' | Save-RHImage -Path C:\ISO
 
-# Pick one image
-Get-RHImage -Version 9.4 -Filter '*boot*' | Select-Object -First 1 | Save-RHImage -Path C:\ISO
-
-# Several versions/architectures at once, then download them all
-$images = Get-RHImage -Version 9.4, 9.5 -Architecture x86_64, aarch64 -Filter '*dvd*'
+# Or pass images explicitly
+$images = Get-RHImage -Version 9.4 -Filter '*boot*'
 Save-RHImage -InputObject $images -Path C:\ISO
 
 # Or specify the link directly
 Save-RHImage -DownloadHref <href> -FileName rhel-9.4-x86_64-dvd.iso -Checksum <sha256> -Path C:\ISO
 ```
 
-`-Path` defaults to the current directory, `-Force` overwrites an existing file, and `-WhatIf` previews. The SHA-256 is verified after download; a mismatching file is deleted.
+Image variants are told apart by file name: `dvd` (full installer), `boot` (network installer), `qcow2` (KVM guest image) and so on. `-Filter` is a wildcard on the file name.
 
-The offline token is exchanged at `sso.redhat.com` (`grant_type=refresh_token`, `client_id=rhsm-api`) for a bearer access token, which is refreshed automatically.
+`Save-RHImage` supports `-Force` (overwrite) and `-WhatIf` (preview). The SHA-256 is checked after download, and a mismatching file is deleted.
 
-## Notes
+## 🖥️ Systems, 🧾 subscriptions and 🏢 organization
 
-The RHSM OpenAPI docs require a Red Hat login, so the image list endpoint (`GET /images/rhel/{version}/{architecture}`) and response shapes are untested against a live account. `GET /images/{checksum}/download` is expected to return `body.href`. Please report discrepancies.
+```powershell
+Get-RHSystem -Name 'web*'
+Get-RHSubscription -Name '*Developer*'
+Get-RHOrganization
+```
 
-## Tests
+## 🧪 Tests
 
 ```powershell
 Invoke-Pester .\tests
 ```
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome. Run the Pester tests before submitting.
+
+## 📄 License
+
+MIT, see [LICENSE](LICENSE).
