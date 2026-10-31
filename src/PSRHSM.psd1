@@ -17,7 +17,7 @@
 
     Copyright = 'Copyright (c) 2026 erikgraa, licensed under the MIT License.'
 
-    Description = 'Unofficial PowerShell module for the Red Hat Subscription Management (RHSM) API. Not affiliated with or endorsed by Red Hat, Inc.'
+    Description = 'Unofficial, community-driven PowerShell module for the Red Hat Subscription Management (RHSM) API. Not affiliated with, sponsored by or endorsed by Red Hat, Inc. or IBM.'
 
     PowerShellVersion = '5.1'
 

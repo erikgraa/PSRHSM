@@ -4,7 +4,7 @@
 
 PowerShell module for the **Red Hat Subscription Management (RHSM) API**: authenticate, find and download RHEL images, and inspect your systems, subscriptions and organization.
 
-> ⚠️ Unofficial, community module. Not affiliated with or endorsed by Red Hat, Inc. "Red Hat" and "RHEL" are trademarks of Red Hat, Inc.
+> ⚠️ Unofficial, community-driven module. Not affiliated with, sponsored by or endorsed by Red Hat, Inc. or IBM. "Red Hat" and "RHEL" are trademarks of Red Hat, Inc.
 
 > 🧪 The RHSM OpenAPI docs require a Red Hat login, so response shapes were written from the documented API. Please report discrepancies.
 
