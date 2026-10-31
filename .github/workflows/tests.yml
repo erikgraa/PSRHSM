@@ -20,7 +20,7 @@ jobs:
       run:
         shell: ${{ matrix.shell }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Show version
         run: $PSVersionTable.PSVersion
       - name: Pester
