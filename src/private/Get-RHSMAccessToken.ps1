@@ -1,4 +1,5 @@
 function Get-RHSMAccessToken {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'The access token arrives as plaintext in the API response and is stored as a SecureString.')]
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (
