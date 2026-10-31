@@ -17,6 +17,9 @@
     .PARAMETER Path
     Specifies the destination directory. Defaults to the current directory.
 
+    .PARAMETER UseInvokeWebRequest
+    Downloads with Invoke-WebRequest -OutFile instead of the built-in streaming downloader. Useful as a fallback; progress display is controlled by $ProgressPreference.
+
     .PARAMETER Force
     Overwrites an existing file.
 
@@ -48,7 +51,10 @@ function Save-RHImage {
         [String]$Path = (Get-Location).Path,
 
         [Parameter(Mandatory = $false)]
-        [Switch]$Force
+        [Switch]$Force,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]$UseInvokeWebRequest
     )
 
     process {
@@ -92,7 +98,12 @@ function Save-RHImage {
 
         try {
             Write-Verbose -Message ('Downloading to {0}' -f $destination)
-            Save-RHFile -Uri $href -Destination $destination
+            if ($UseInvokeWebRequest) {
+                Invoke-WebRequest -Uri $href -OutFile $destination -UseBasicParsing
+            }
+            else {
+                Save-RHFile -Uri $href -Destination $destination
+            }
         }
         catch {
             if (Test-Path -Path $destination) { Remove-Item -Path $destination -Force }
