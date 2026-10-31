@@ -27,7 +27,7 @@ Disconnect-RHSubscription
 
 ### Downloading after `Get-RHImage`
 
-`Save-RHImage` accepts `Checksum` and `FileName` from the pipeline:
+`Save-RHImage` accepts `DownloadHref`, `FileName` and `Checksum` from the pipeline:
 
 ```powershell
 # Download everything matching the filter
@@ -36,8 +36,8 @@ Get-RHImage -Version 9.4 -Filter '*dvd*' | Save-RHImage -Path C:\ISO
 # Pick one image
 Get-RHImage -Version 9.4 -Filter '*boot*' | Select-Object -First 1 | Save-RHImage -Path C:\ISO
 
-# Or specify the checksum directly
-Save-RHImage -Checksum <sha256> -FileName rhel-9.4-x86_64-dvd.iso -Path C:\ISO
+# Or specify the link directly
+Save-RHImage -DownloadHref <href> -FileName rhel-9.4-x86_64-dvd.iso -Checksum <sha256> -Path C:\ISO
 ```
 
 `-Path` defaults to the current directory, `-Force` overwrites an existing file, and `-WhatIf` previews. The SHA-256 is verified after download; a mismatching file is deleted.
