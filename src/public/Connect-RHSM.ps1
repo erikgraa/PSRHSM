@@ -13,7 +13,7 @@
     Specifies the v1 API base URI. Defaults to https://api.access.redhat.com/management/v1.
 
     .PARAMETER BaseUriV2
-    Specifies the v2 API base URI, used for activation keys. Defaults to https://api.access.redhat.com/api/rhsm/v2.
+    Specifies the v2 API base URI, used for activation keys. Defaults to https://console.redhat.com/api/rhsm/v2.
 
     .EXAMPLE
     $token = Read-Host -AsSecureString -Prompt 'Red Hat offline token'
@@ -39,7 +39,7 @@ function Connect-RHSM {
 
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
-        [String]$BaseUriV2 = 'https://api.access.redhat.com/api/rhsm/v2'
+        [String]$BaseUriV2 = 'https://console.redhat.com/api/rhsm/v2'
     )
 
     process {
