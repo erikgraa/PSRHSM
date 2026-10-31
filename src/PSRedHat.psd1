@@ -30,6 +30,7 @@
             )
 
             ProjectUri     = 'https://github.com/erikgraa/PSRedHat'
+            IconUri        = 'https://raw.githubusercontent.com/erikgraa/PSRedHat/main/assets/icon.png'
             License        = 'https://github.com/erikgraa/PSRedHat/blob/main/LICENSE'
             ReleaseNotes   = 'https://github.com/erikgraa/PSRedHat'
         }

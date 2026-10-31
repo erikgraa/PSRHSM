@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/icon.png" alt="PSRedHat icon" width="160"></p>
+
 # 🎩 PSRedHat
 
 PowerShell module for the **Red Hat Subscription Management (RHSM) API**: authenticate, find and download RHEL images, and inspect your systems, subscriptions and organization.
@@ -86,4 +88,4 @@ Issues and pull requests are welcome. Run the Pester tests before submitting.
 
 ## 📄 License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). The icon is original artwork.
