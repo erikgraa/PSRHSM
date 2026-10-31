@@ -21,7 +21,7 @@
 
     PowerShellVersion = '5.1'
 
-    FunctionsToExport = @('Connect-RHSubscription', 'Disconnect-RHSubscription', 'Get-RHImage', 'Save-RHImage')
+    FunctionsToExport = @('Connect-RHSubscription', 'Disconnect-RHSubscription', 'Get-RHImage', 'Get-RHSystem', 'Save-RHImage')
 
     PrivateData = @{
         PSData = @{

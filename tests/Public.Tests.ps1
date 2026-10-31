@@ -21,6 +21,23 @@ Describe 'Get-RHImage' {
     }
 }
 
+Describe 'Get-RHSystem' {
+    It 'pages through systems and filters by name' {
+        InModuleScope PSRedHat {
+            $script:calls = 0
+            Mock Invoke-RHApiRequest {
+                $script:calls++
+                $count = if ($script:calls -eq 1) { 100 } else { 1 }
+                [PSCustomObject]@{ body = 1..$count | ForEach-Object { [PSCustomObject]@{ name = ('web{0}-{1}' -f $script:calls, $_) } } }
+            }
+
+            @(Get-RHSystem).Count | Should -Be 101
+            $script:calls | Should -Be 2
+            @(Get-RHSystem -Name 'web2-*').Count | Should -Be 0
+        }
+    }
+}
+
 Describe 'Save-RHImage' {
     BeforeEach {
         InModuleScope PSRedHat {
