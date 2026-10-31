@@ -36,6 +36,10 @@ Get-RHImage -Version 9.4 -Filter '*dvd*' | Save-RHImage -Path C:\ISO
 # Pick one image
 Get-RHImage -Version 9.4 -Filter '*boot*' | Select-Object -First 1 | Save-RHImage -Path C:\ISO
 
+# Several versions/architectures at once, then download them all
+$images = Get-RHImage -Version 9.4, 9.5 -Architecture x86_64, aarch64 -Filter '*dvd*'
+Save-RHImage -InputObject $images -Path C:\ISO
+
 # Or specify the link directly
 Save-RHImage -DownloadHref <href> -FileName rhel-9.4-x86_64-dvd.iso -Checksum <sha256> -Path C:\ISO
 ```

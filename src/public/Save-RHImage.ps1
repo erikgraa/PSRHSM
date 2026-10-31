@@ -5,6 +5,9 @@
     .DESCRIPTION
     Downloads the image from its download link (as returned by Get-RHImage) with Invoke-WebRequest -OutFile, authenticating with the current access token, and verifies the SHA-256 checksum.
 
+    .PARAMETER InputObject
+    Specifies one or more image objects from Get-RHImage, by pipeline or parameter.
+
     .PARAMETER DownloadHref
     Specifies the download link, as returned by Get-RHImage.
 
@@ -23,6 +26,10 @@
     .EXAMPLE
     Get-RHImage -Version 9.4 -Filter '*dvd*' | Save-RHImage -Path C:\ISO
 
+    .EXAMPLE
+    $images = Get-RHImage -Version 9.4, 9.5 -Filter '*dvd*'
+    Save-RHImage -InputObject $images -Path C:\ISO
+
     .OUTPUTS
     [System.IO.FileInfo].
 
@@ -34,14 +41,18 @@ function Save-RHImage {
     [CmdletBinding(SupportsShouldProcess = $true)]
     [OutputType([System.IO.FileInfo])]
     param (
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ParameterSetName = 'Image', ValueFromPipeline = $true, Position = 0)]
+        [ValidateNotNullOrEmpty()]
+        [PSObject[]]$InputObject,
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'Href', ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
         [String]$DownloadHref,
 
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $false, ParameterSetName = 'Href', ValueFromPipelineByPropertyName = $true)]
         [String]$FileName,
 
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $false, ParameterSetName = 'Href', ValueFromPipelineByPropertyName = $true)]
         [String]$Checksum,
 
         [Parameter(Mandatory = $false)]
@@ -52,34 +63,48 @@ function Save-RHImage {
     )
 
     process {
-        $name = if ($FileName) { $FileName } else { [IO.Path]::GetFileName(([Uri]$DownloadHref).AbsolutePath) }
-        $destination = Join-Path -Path $Path -ChildPath $name
-
-        if ((Test-Path -Path $destination) -and -not $Force) {
-            Write-Error -Message ("'{0}' already exists. Use -Force to overwrite." -f $destination)
-            return
+        $images = if ($PSCmdlet.ParameterSetName -eq 'Image') {
+            $InputObject
+        }
+        else {
+            [PSCustomObject]@{ DownloadHref = $DownloadHref; FileName = $FileName; Checksum = $Checksum }
         }
 
-        if (-not $PSCmdlet.ShouldProcess($destination, 'Download image')) {
-            return
-        }
+        foreach ($image in $images) {
+            if (-not $image.DownloadHref) {
+                Write-Error -Message 'Input object has no DownloadHref; pass objects from Get-RHImage.'
+                continue
+            }
 
-        try {
-            Write-Verbose -Message ('Downloading {0} to {1}' -f $DownloadHref, $destination)
-            Invoke-WebRequest -Uri $DownloadHref -Headers (Get-RHAuthorizationHeader) -OutFile $destination -UseBasicParsing
-        }
-        catch {
-            if (Test-Path -Path $destination) { Remove-Item -Path $destination -Force }
-            Write-Error -Message ('Error encountered downloading the image: {0}' -f $_)
-            return
-        }
+            $name = if ($image.FileName) { $image.FileName } else { [IO.Path]::GetFileName(([Uri]$image.DownloadHref).AbsolutePath) }
+            $destination = Join-Path -Path $Path -ChildPath $name
 
-        if ($Checksum -and -not (Test-RHFileHash -Path $destination -Checksum $Checksum)) {
-            Remove-Item -Path $destination -Force
-            Write-Error -Message 'SHA-256 checksum mismatch; the downloaded file was removed.'
-            return
-        }
+            if ((Test-Path -Path $destination) -and -not $Force) {
+                Write-Error -Message ("'{0}' already exists. Use -Force to overwrite." -f $destination)
+                continue
+            }
 
-        Get-Item -Path $destination
+            if (-not $PSCmdlet.ShouldProcess($destination, 'Download image')) {
+                continue
+            }
+
+            try {
+                Write-Verbose -Message ('Downloading {0} to {1}' -f $image.DownloadHref, $destination)
+                Invoke-WebRequest -Uri $image.DownloadHref -Headers (Get-RHAuthorizationHeader) -OutFile $destination -UseBasicParsing
+            }
+            catch {
+                if (Test-Path -Path $destination) { Remove-Item -Path $destination -Force }
+                Write-Error -Message ('Error encountered downloading the image: {0}' -f $_)
+                continue
+            }
+
+            if ($image.Checksum -and -not (Test-RHFileHash -Path $destination -Checksum $image.Checksum)) {
+                Remove-Item -Path $destination -Force
+                Write-Error -Message ("SHA-256 checksum mismatch for '{0}'; the downloaded file was removed." -f $name)
+                continue
+            }
+
+            Get-Item -Path $destination
+        }
     }
 }
