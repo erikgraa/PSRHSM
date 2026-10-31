@@ -54,6 +54,22 @@ Describe 'Get-RHSubscription' {
     }
 }
 
+Describe 'Get-RHOrganization' {
+    It 'unwraps the body when present' {
+        InModuleScope PSRedHat {
+            Mock Invoke-RHApiRequest { [PSCustomObject]@{ body = [PSCustomObject]@{ name = 'Acme' } } }
+            (Get-RHOrganization).name | Should -Be 'Acme'
+        }
+    }
+
+    It 'returns the response itself when there is no body' {
+        InModuleScope PSRedHat {
+            Mock Invoke-RHApiRequest { [PSCustomObject]@{ name = 'Acme' } }
+            (Get-RHOrganization).name | Should -Be 'Acme'
+        }
+    }
+}
+
 Describe 'Save-RHImage' {
     BeforeEach {
         InModuleScope PSRedHat {
